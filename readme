@@ -1,0 +1,154 @@
+Project Title: CodeGuard – AI-Powered Code Security Auditor
+
+🚀 Project Overview CodeGuard is an AI assistant that reviews source code to detect security vulnerabilities, insecure coding practices, and potential exploits. Using Large Language Models (LLMs) with prompt engineering, it analyzes code snippets and returns structured feedback highlighting risks and suggesting secure fixes.
+
+The project leverages zero-shot, one-shot, multi-shot, dynamic, and chain-of-thought prompting to improve the precision and coverage of security analysis. Additionally, embeddings and vector databases enable context-aware vulnerability detection by matching similar known exploits.
+
+🔧 Features
+
+Vulnerability Detection – Identifies common security flaws (e.g., SQL Injection, XSS, buffer overflow).
+
+Secure Coding Suggestions – Recommends best practices and fixes for vulnerabilities.
+
+Structured Output – Returns results in JSON with fields: issues, suggestions, overall_security_rating.
+
+Prompt Engineering – Applies zero-shot, one-shot, multi-shot, dynamic, and chain-of-thought prompting.
+
+Similarity Search – Embeddings + vector DB to find related vulnerabilities and past patches.
+
+Function Calling – analyzeSecurity(language, snippet) to automate code security auditing.
+
+🎯 Tech Stack
+
+Backend: Node.js / Python
+
+LLM: OpenAI / Hugging Face API
+
+Database: Vector DB (Pinecone / FAISS)
+
+Evaluation: Custom testing framework using security metrics and vulnerability benchmarks
+
+📈 Future Scope
+
+Multi-language support for popular programming languages (Python, JavaScript, Java, C++, etc.)
+
+Integration with CI/CD pipelines (GitHub/GitLab) for automated security reviews on pull requests
+
+Continuous learning from new vulnerability databases and advisories
+
+📝 System and User Prompts
+
+🔹 System Prompt You are an AI Code Security Auditor. Analyze the given code snippet, identify security vulnerabilities, recommend fixes, and provide an overall security rating. Return results in JSON format containing:
+
+issues: List of detected security flaws
+
+suggestions: Recommended security improvements
+
+overall_security_rating: A summary rating (e.g., "High Risk", "Medium Risk", "Low Risk")
+
+🔹 User Prompt Review the following Python code for security issues:
+
+def login(user_input): query = "SELECT * FROM users WHERE username = '" + user_input + "'" execute(query)
+
+🎯 Zero-Shot Prompting System Prompt: You are a code security auditor. Analyze the following code, detect security vulnerabilities, and suggest fixes. Return results in JSON format with issues, suggestions, and overall_security_rating.
+
+User Prompt: Review this JavaScript snippet:
+
+eval(userInput);
+
+🎯 One-Shot Prompting System Prompt: You are a code security auditor. Analyze code snippets, detect security issues, and recommend fixes. Return JSON-formatted responses.
+
+User Prompt (with one example):
+
+Example Input (Python):
+
+password = input("Enter password: ") if password == "1234": print("Access granted")
+
+Example Expected Output:
+
+{ "issues": ["Hardcoded password detected, which is insecure."], "suggestions": ["Use secure password storage and verification methods."], "overall_security_rating": "High Risk" }
+
+Now analyze this Java code:
+
+String query = "SELECT * FROM users WHERE id = " + userId; executeQuery(query);
+
+🎯 Multi-Shot Prompting System Prompt: You are a code security auditor. Analyze code snippets for vulnerabilities and suggest fixes. Return responses as JSON.
+
+User Prompt (with multiple examples):
+
+Example 1 (JavaScript):
+
+document.write(userInput);
+
+Expected Output:
+
+{ "issues": ["Potential Cross-Site Scripting (XSS) vulnerability."], "suggestions": ["Use proper input sanitization before rendering user content."], "overall_security_rating": "Medium Risk" }
+
+Example 2 (C++):
+
+char buffer[10]; strcpy(buffer, input);
+
+Expected Output:
+
+{ "issues": ["Buffer overflow risk due to unsafe strcpy usage."], "suggestions": ["Use safer functions like strncpy or bounds checking."], "overall_security_rating": "High Risk" }
+
+Now review this Python snippet:
+
+import os os.system("rm -rf " + user_input)
+
+🔹 Dynamic Prompting System Prompt Template: You are a code security auditor. Analyze the following {{language}} code snippet, detect vulnerabilities, and suggest fixes. Return JSON with issues, suggestions, and overall_security_rating.
+
+User Prompt (dynamic):
+
+Review this {{language}} code:
+
+{{code_snippet}}
+
+Example with Python snippet:
+
+Review this Python code:
+
+def process(data): exec(data)
+
+🎯 Chain-of-Thought Prompting System Prompt: You are a code security auditor. Think step-by-step internally about possible security issues in the code, then output only the JSON result with issues, suggestions, and overall_security_rating. Do not show your reasoning.
+
+User Prompt: Review the following Python code:
+
+def authenticate(user_input): if user_input == "admin": grant_access()
+
+Expected output:
+
+{ "issues": ["Hardcoded admin username check without proper authentication."], "suggestions": ["Implement secure authentication mechanisms with password hashing."], "overall_security_rating": "High Risk" }
+
+🧪 Evaluation Dataset & Testing Framework
+
+We created a dataset of 5+ code snippets with known security vulnerabilities and expected outputs to benchmark CodeGuard.
+
+📂 Evaluation Dataset (5 Samples)
+
+[ { "id": 1, "language": "Python", "code": "def login(user_input): query = "SELECT * FROM users WHERE username = '" + user_input + "'"; execute(query)", "expected": "SQL Injection vulnerability due to unsafe string concatenation." }, { "id": 2, "language": "JavaScript", "code": "eval(userInput);", "expected": "Use of eval on user input leads to remote code execution risk." }, { "id": 3, "language": "Java", "code": "String password = "12345";", "expected": "Hardcoded password detected." }, { "id": 4, "language": "C++", "code": "char buf[8]; strcpy(buf, input);", "expected": "Buffer overflow risk with unsafe strcpy." }, { "id": 5, "language": "Python", "code": "os.system('rm -rf ' + user_input)", "expected": "Command injection vulnerability due to unsafe shell command." } ]
+
+🧑‍⚖️ Judge Prompt You are a judge. Compare AI output to expected results on:
+
+Correctness – Did the model detect the main security flaw?
+
+Completeness – Did it suggest meaningful fixes?
+
+Format – Is the output valid JSON with all fields?
+
+Clarity – Is the feedback clear and actionable?
+
+Return: Pass / Fail with justification.
+
+⚙️ Testing Framework Setup
+
+for test in dataset: ai_output = run_model(test["code"]) verdict = judge(ai_output, test["expected"]) print(f"Test {test['id']}: {verdict}")
+
+✅ Why This Setup?
+
+Objective and automated evaluation of security review accuracy.
+
+Clear metrics on detection and suggestion quality.
+
+Easily extendable with new vulnerability cases.
+
