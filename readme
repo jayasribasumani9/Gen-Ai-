@@ -103,8 +103,70 @@ def login(user_input):
   ],
   "overall_security_rating": "High Risk"
 }
-```
 
+🔐 Zero-Shot Prompting in CodeGuard (Python Only)
+
+In CodeGuard, we use Zero-Shot Prompting to detect security vulnerabilities in Python code without providing any prior examples.
+The AI understands the task from the prompt instructions alone — no demonstrations needed.
+This enables scalable, adaptive, and language-focused auditing across a wide range of Python codebases.
+
+🔹 Zero-Shot Prompt Template (Python)
+
+System Prompt:
+You are an AI Code Security Auditor. Analyze the given Python code snippet, identify security vulnerabilities, recommend secure coding fixes, and provide an overall security rating.
+Always return results in JSON format with the following fields:
+
+issues: List of detected security flaws
+
+suggestions: Recommended security improvements
+
+overall_security_rating: A summary rating (e.g., "High Risk", "Medium Risk", "Low Risk")
+
+User Prompt:
+Review the following Python code and provide a structured security audit:
+
+{{code_snippet}}
+
+✅ Zero-Shot Prompting Examples (Python)
+🔎 Example 1
+def login(user_input):
+    query = "SELECT * FROM users WHERE username = '" + user_input + "'"
+    execute(query)
+
+
+AI Output:
+
+{
+  "issues": ["SQL Injection vulnerability due to unsafe string concatenation."],
+  "suggestions": ["Use parameterized queries or ORM methods to avoid SQL injection."],
+  "overall_security_rating": "High Risk"
+}
+
+🔎 Example 2
+import os
+os.system("rm -rf " + user_input)
+
+
+AI Output:
+
+{
+  "issues": ["Command injection vulnerability due to unvalidated shell input."],
+  "suggestions": ["Use the 'subprocess' module with argument lists instead of shell=True. Always sanitize input."],
+  "overall_security_rating": "High Risk"
+}
+
+🔎 Example 3
+def process(data):
+    exec(data)
+
+
+AI Output:
+
+{
+  "issues": ["Use of 'exec' with untrusted input can lead to code execution vulnerabilities."],
+  "suggestions": ["Avoid using 'exec' on user input. Validate and sanitize data, or refactor logic to avoid dynamic execution."],
+  "overall_security_rating": "High Risk"
+}
 ---
 
 ### 🧠 Chain-of-Thought Prompting Version (Internal Thinking)
@@ -214,11 +276,7 @@ for test in dataset:
 
 ---
 
-🎯 Zero-Shot Prompting System Prompt: You are a code security auditor. Analyze the following code, detect security vulnerabilities, and suggest fixes. Return results in JSON format with issues, suggestions, and overall_security_rating.
 
-User Prompt: Review this JavaScript snippet:
-
-eval(userInput);
 
 🎯 One-Shot Prompting System Prompt: You are a code security auditor. Analyze code snippets, detect security issues, and recommend fixes. Return JSON-formatted responses.
 
