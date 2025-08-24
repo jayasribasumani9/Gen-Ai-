@@ -36,19 +36,183 @@ Integration with CI/CD pipelines (GitHub/GitLab) for automated security reviews 
 
 Continuous learning from new vulnerability databases and advisories
 
-📝 System and User Prompts
+Thanks for the detailed project outline. You're building **CodeGuard**, an AI-powered code security auditor that applies advanced prompting strategies (Zero/One/Multi-shot, Dynamic, Chain-of-Thought), LLMs, and vector search for vulnerability detection.
 
-🔹 System Prompt You are an AI Code Security Auditor. Analyze the given code snippet, identify security vulnerabilities, recommend fixes, and provide an overall security rating. Return results in JSON format containing:
+To help you **mirror the structure** you've described for **AlgoSage** but tailored for **CodeGuard**, here’s a refined and **RTFC-aligned prompt schema** for your system:
 
-issues: List of detected security flaws
+---
 
-suggestions: Recommended security improvements
+## 🛡️ CodeGuard – AI Code Security Auditor Prompt Framework (RTFC-Aligned)
 
-overall_security_rating: A summary rating (e.g., "High Risk", "Medium Risk", "Low Risk")
+---
 
-🔹 User Prompt Review the following Python code for security issues:
+### 🔹 System Prompt (Role)
 
-def login(user_input): query = "SELECT * FROM users WHERE username = '" + user_input + "'" execute(query)
+```text
+You are an AI Code Security Auditor.
+
+Your role is to analyze the given code snippet for security vulnerabilities. You must identify insecure coding practices, potential exploits, and recommend secure alternatives. Return structured output in **valid JSON** format with the following fields:
+
+- issues: List of detected security flaws.
+- suggestions: Recommended secure coding practices or fixes.
+- overall_security_rating: One of ["High Risk", "Medium Risk", "Low Risk"].
+```
+
+---
+
+### 🔹 User Prompt (Task + Context)
+
+```text
+Review the following {{language}} code for security vulnerabilities and provide feedback as per the defined JSON schema:
+
+{{code_snippet}}
+```
+
+---
+
+### 📌 RTFC Framework Usage
+
+* **R (Role):** Clearly defined as an **AI Code Security Auditor**.
+* **T (Task):** Analyze code to detect security flaws and recommend secure practices.
+* **F (Format):** Must return a valid **JSON object** with fields: `issues`, `suggestions`, `overall_security_rating`.
+* **C (Context):** Includes code snippet and programming language information (e.g., Python, JavaScript, C++, etc.).
+
+---
+
+### ✅ Example Prompt and Output (RTFC Compliant)
+
+**🧾 User Input:**
+
+```text
+Review the following Python code for security vulnerabilities:
+
+def login(user_input):
+    query = "SELECT * FROM users WHERE username = '" + user_input + "'"
+    execute(query)
+```
+
+**🤖 Expected Output (JSON):**
+
+```json
+{
+  "issues": [
+    "SQL Injection vulnerability due to unsafe string concatenation."
+  ],
+  "suggestions": [
+    "Use parameterized queries or prepared statements to safely handle user input."
+  ],
+  "overall_security_rating": "High Risk"
+}
+```
+
+---
+
+### 🧠 Chain-of-Thought Prompting Version (Internal Thinking)
+
+**System Prompt:**
+
+```text
+You are a code security auditor. Think step-by-step internally about possible security issues in the code, but output **only** the final result in valid JSON. Do not show your reasoning.
+```
+
+**User Prompt:**
+
+```text
+Review the following Python code:
+
+def authenticate(user_input):
+    if user_input == "admin":
+        grant_access()
+```
+
+**Expected Output:**
+
+```json
+{
+  "issues": [
+    "Hardcoded admin username check without proper authentication mechanism."
+  ],
+  "suggestions": [
+    "Use a secure authentication system with hashed credentials and role-based access control."
+  ],
+  "overall_security_rating": "High Risk"
+}
+```
+
+---
+
+### 🔄 Dynamic Prompting Template
+
+You can dynamically insert language and code to scale multi-language auditing:
+
+```text
+System Prompt:
+You are a code security auditor. Analyze the following {{language}} code, detect vulnerabilities, and suggest secure fixes. Return structured JSON with `issues`, `suggestions`, and `overall_security_rating`.
+
+User Prompt:
+Review this {{language}} code:
+
+{{code_snippet}}
+```
+
+---
+
+### 📊 Testing Framework (Python Pseudo-code)
+
+```python
+for test in dataset:
+    ai_output = run_model(test["language"], test["code"])
+    verdict = judge(ai_output, test["expected"])
+    print(f"Test {test['id']}: {verdict}")
+```
+
+**Judge Criteria:**
+
+* ✅ **Correctness**: Was the main vulnerability correctly identified?
+* ✅ **Completeness**: Were actionable and comprehensive suggestions provided?
+* ✅ **Format**: Was the response in valid JSON?
+* ✅ **Clarity**: Was the output understandable and useful?
+
+---
+
+### 🧠 Sample Evaluation Dataset (for Benchmarking)
+
+```json
+[
+  {
+    "id": 1,
+    "language": "Python",
+    "code": "def login(user_input): query = \"SELECT * FROM users WHERE username = '\" + user_input + \"'\"; execute(query)",
+    "expected": "SQL Injection vulnerability due to unsafe string concatenation."
+  },
+  {
+    "id": 2,
+    "language": "JavaScript",
+    "code": "eval(userInput);",
+    "expected": "Use of eval on user input leads to remote code execution risk."
+  },
+  {
+    "id": 3,
+    "language": "Java",
+    "code": "String password = \"12345\";",
+    "expected": "Hardcoded password detected."
+  },
+  {
+    "id": 4,
+    "language": "C++",
+    "code": "char buf[8]; strcpy(buf, input);",
+    "expected": "Buffer overflow risk with unsafe strcpy."
+  },
+  {
+    "id": 5,
+    "language": "Python",
+    "code": "os.system('rm -rf ' + user_input)",
+    "expected": "Command injection vulnerability due to unsafe shell command."
+  }
+]
+```
+
+---
 
 🎯 Zero-Shot Prompting System Prompt: You are a code security auditor. Analyze the following code, detect security vulnerabilities, and suggest fixes. Return results in JSON format with issues, suggestions, and overall_security_rating.
 
