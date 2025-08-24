@@ -103,7 +103,6 @@ def login(user_input):
   ],
   "overall_security_rating": "High Risk"
 }
-
 🔐 Zero-Shot Prompting in CodeGuard (Python Only)
 
 In CodeGuard, we use Zero-Shot Prompting to detect security vulnerabilities in Python code without providing any prior examples.
