@@ -1069,6 +1069,117 @@ response = openai.ChatCompletion.create(
 ---
 
 
+### 🛑 What is a **Stop Sequence** in LLMs?
+
+A **stop sequence** is a string or set of strings that tells the **language model when to stop generating further tokens**. Once the model generates the stop sequence, it **terminates the response** immediately—returning everything generated **up to, but not including** the stop text.
+
+---
+
+### 🔍 Why Use Stop Sequences?
+
+Stop sequences are useful to:
+
+* ✅ Prevent over-generation.
+* ✅ Cut off irrelevant or unsafe outputs.
+* ✅ Cleanly separate model responses from instructions or next tasks.
+* ✅ Structure output (e.g., JSON ends at `}`).
+
+---
+
+### 🧠 Example:
+
+If you’re prompting the model to generate a JSON response and you set:
+
+```python
+stop=["}"]
+```
+
+The model will stop generating once it reaches the closing brace (`}`), ensuring clean and valid JSON (rather than continuing with unrelated tokens).
+
+---
+
+### 🔐 In CodeGuard (AI Code Security Auditor):
+
+Since CodeGuard returns **structured JSON** output like:
+
+```json
+{
+  "issues": [...],
+  "suggestions": [...],
+  "overall_security_rating": "High Risk"
+}
+```
+
+You can use `stop=["}"]` (or a more custom stop like `"\n\n"` or `"### END"`), depending on how your prompts are structured, to:
+
+* Ensure the model finishes cleanly after the JSON block.
+* Avoid extra commentary, logs, or irrelevant tokens.
+
+---
+
+### 🛠️ Code Update: Add `stop` Parameter
+
+If you're using OpenAI’s API:
+
+```python
+# Before
+response = openai.ChatCompletion.create(
+    model="gpt-4",
+    messages=prompt_messages,
+    temperature=0.2,
+    top_p=0.8
+)
+
+# After (with stop sequence)
+response = openai.ChatCompletion.create(
+    model="gpt-4",
+    messages=prompt_messages,
+    temperature=0.2,
+    top_p=0.8,
+    stop=["}"]  # Stop generation after closing JSON object
+)
+```
+
+> 🔎 You may also use something like `stop=["###"]` if your prompt includes that as an end-of-response marker.
+
+---
+
+### ⚙️ Git Workflow: Add Stop Sequence & Create Pull Request
+
+1. **Create a new branch**
+
+   ```bash
+   git checkout -b feature/add-stop-sequence
+   ```
+
+2. **Edit your backend code to include `stop=["}"]`** in the LLM call.
+
+3. **Commit your changes**
+
+   ```bash
+   git add .
+   git commit -m "Add stop sequence to LLM call to ensure clean JSON output"
+   ```
+
+4. **Push your branch**
+
+   ```bash
+   git push origin feature/add-stop-sequence
+   ```
+
+5. **Create a Pull Request**
+
+---
+
+### 📝 PR Description Example
+
+> **Title:** Add Stop Sequence to LLM API Call
+>
+> **Description:**
+> This PR adds a stop sequence (`stop=["}"]`) to the LLM API call in CodeGuard to ensure the model stops generating after producing a valid JSON response. This helps avoid extra or malformed output and ensures consistent parsing of results. It complements existing generation controls (`temperature=0.2`, `top_p=0.8`, `top_k=20`).
+
+---
+
 
 
 
