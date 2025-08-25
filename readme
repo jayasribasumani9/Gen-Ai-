@@ -205,7 +205,7 @@ Expected Output (AI Response):
 
 System Prompt:
 You are an AI code reviewer. Analyze the given code, detect security vulnerabilities, and suggest fixes.
-Always return results in JSON format with three fields: issues, suggestions, and overall_feedback.
+Always return results in JSON format with three fields: issues, suggestions, and overall_feedback..
 
 User Prompt (with multiple examples):
 
