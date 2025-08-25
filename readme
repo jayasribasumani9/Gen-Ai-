@@ -237,7 +237,7 @@ Expected Output:
   "suggestions": ["Avoid using eval. Use safer alternatives like JSON.parse or direct function calls when possible."],
   "overall_feedback": "High-risk pattern found; using eval on untrusted input is dangerous."
 }
-------------------------------------
+------------------------------------------------------------------------------
 🔹 Dynamic Prompting
 
 🧠 What is Dynamic Prompting?
