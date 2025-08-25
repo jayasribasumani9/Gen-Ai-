@@ -289,7 +289,7 @@ Expected Output:
   "overall_security_rating": "Medium Risk"
 }
 
-
+..
 ### 🧠 Chain-of-Thought Prompting Version (Internal Thinking)
 
 **System Prompt:**
