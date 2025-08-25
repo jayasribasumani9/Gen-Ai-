@@ -759,3 +759,88 @@ def log_tokens_to_file(file_path, model, prompt, completion):
         f.write(f"Input Tokens: {len(prompt)}\n")
         f.write(f"Output Tokens: {len(completion)}\n")
         f.write(f"Total Tokens Used: {total}\n\n")
+
+
+
+### 🔥 What is **Temperature** in Large Language Models (LLMs)?
+
+**Temperature** is a parameter used in text generation by language models like GPT (including in your CodeGuard project using OpenAI/Hugging Face APIs). It **controls the randomness** or **creativity** of the model’s output.
+
+---
+
+### 📊 Explanation:
+
+* **Low Temperature (e.g., 0.0 – 0.3):**
+
+  * Output is **more deterministic**, **precise**, and **focused**.
+  * The model tends to pick the **most likely next token**.
+  * Best for **code auditing**, **security analysis**, or any task where **accuracy and consistency** are critical.
+* **Medium Temperature (e.g., 0.5):**
+
+  * Balance between randomness and predictability.
+  * Good for general-purpose generation with some variation.
+* **High Temperature (e.g., 0.7 – 1.0+):**
+
+  * Output becomes **more diverse**, **creative**, but potentially **less accurate**.
+  * Used for tasks like brainstorming, storytelling, etc.
+
+---
+
+### 🔐 In the context of CodeGuard:
+
+Since **security auditing** requires **deterministic**, **consistent**, and **accurate results**, it’s best to use a **low temperature** setting.
+
+---
+
+### ✅ Update: Temperature in AI Call
+
+Assuming your backend is using **OpenAI API** (e.g., `openai.ChatCompletion.create`), you can add/update the temperature like this:
+
+```python
+# Before
+response = openai.ChatCompletion.create(
+    model="gpt-4",
+    messages=prompt_messages,
+)
+
+# After (Updated)
+response = openai.ChatCompletion.create(
+    model="gpt-4",
+    messages=prompt_messages,
+    temperature=0.2  # Low temperature for deterministic output
+)
+```
+
+---
+
+### 🔧 Pull Request (Concept)
+
+You would:
+
+1. Update the relevant function (`analyzeSecurity` or backend call to the LLM) to include `temperature=0.2`.
+2. Create a new branch:
+
+   ```bash
+   git checkout -b feature/set-low-temperature
+   ```
+3. Commit the change:
+
+   ```bash
+   git add .
+   git commit -m "Set temperature to 0.2 for consistent security audit outputs"
+   ```
+4. Push and create a Pull Request:
+
+   ```bash
+   git push origin feature/set-low-temperature
+   ```
+
+---
+
+### 💡 Summary
+
+* **Temperature** controls output **creativity vs. reliability**.
+* **Low temperature (\~0.2)** is ideal for **security auditing** tasks like in CodeGuard.
+* Update your LLM API calls to include `temperature=0.2` for **consistent and reliable analysis**.
+
+
