@@ -1180,6 +1180,160 @@ response = openai.ChatCompletion.create(
 
 ---
 
+### 📦 What is **Structured Output** in LLMs?
+
+**Structured output** refers to responses from a Language Model that follow a **predefined format**—like **JSON**, **XML**, or any other machine-readable structure—so the results can be **easily parsed, interpreted, or integrated** into systems.
+
+---
+
+### 🧠 Why Use Structured Output?
+
+Structured output is essential when:
+
+* You want to **parse results programmatically** (e.g., in CodeGuard).
+* You need **predictable formats** for UI rendering, CI/CD pipelines, or databases.
+* You're building **APIs or developer tools** using LLMs (e.g., `analyzeSecurity(language, snippet)` in CodeGuard).
+
+---
+
+### 📌 In the Context of CodeGuard:
+
+Your project already specifies that the LLM should return:
+
+```json
+{
+  "issues": [...],
+  "suggestions": [...],
+  "overall_security_rating": "High Risk"
+}
+```
+
+By implementing structured output properly, you:
+
+* Make the AI responses **parseable** in your backend.
+* Improve **reliability** of automation in code review pipelines.
+* Reduce errors in post-processing or UI rendering.
+
+---
+
+### 🛠️ How to Implement Structured Output in AI Call
+
+#### ✅ Step 1: Update Prompt to Explicitly Request JSON
+
+Make the system prompt **instructive and strict**, like:
+
+```text
+You are a code security auditor. Analyze the given {{language}} code snippet.
+Return only a valid JSON object in the following format:
+
+{
+  "issues": [...],
+  "suggestions": [...],
+  "overall_security_rating": "..."
+}
+
+Do not return any explanation or extra text.
+```
+
+#### ✅ Step 2: Parseable Output Control in API Call
+
+In your OpenAI call:
+
+```python
+response = openai.ChatCompletion.create(
+    model="gpt-4",
+    messages=prompt_messages,
+    temperature=0.2,
+    top_p=0.8,
+    stop=["}"],  # To ensure JSON ends cleanly
+)
+```
+
+Then programmatically extract and parse the JSON:
+
+```python
+import json
+
+output_text = response["choices"][0]["message"]["content"] + "}"
+structured_output = json.loads(output_text)
+```
+
+> 🔐 You could also validate the schema using a JSON schema validator, depending on your use case.
+
+---
+
+### 🛠️ Code Implementation: Structured Output
+
+Update your backend logic for calling the LLM, for example:
+
+```python
+def analyzeSecurity(language, snippet):
+    prompt = f"""
+    You are a code security auditor. Analyze the given {language} code snippet.
+    Return only a valid JSON object in the following format:
+
+    {{
+      "issues": [...],
+      "suggestions": [...],
+      "overall_security_rating": "..."
+    }}
+
+    Code:
+    {snippet}
+    """
+
+    response = openai.ChatCompletion.create(
+        model="gpt-4",
+        messages=[{"role": "system", "content": prompt}],
+        temperature=0.2,
+        top_p=0.8,
+        stop=["}"],
+    )
+
+    output = response.choices[0].message.content + "}"
+    return json.loads(output)
+```
+
+---
+
+### 🔁 Git Workflow: Add Structured Output & Create Pull Request
+
+1. **Create a new branch**
+
+   ```bash
+   git checkout -b feature/structured-output
+   ```
+
+2. **Update your `analyzeSecurity` function or API wrapper** as shown above.
+
+3. **Commit your changes**
+
+   ```bash
+   git add .
+   git commit -m "Implement structured JSON output in LLM call for audit results"
+   ```
+
+4. **Push the branch**
+
+   ```bash
+   git push origin feature/structured-output
+   ```
+
+5. **Create a Pull Request**
+
+---
+
+### 📝 PR Description Example
+
+> **Title:** Add Structured JSON Output to LLM Call
+>
+> **Description:**
+> This PR updates the `analyzeSecurity` function to enforce structured JSON output from the LLM. The system prompt has been revised to strictly request JSON-formatted results, and the response parser ensures clean, machine-readable outputs. This allows CodeGuard to reliably process AI audit results for use in CI/CD pipelines, UIs, and evaluation frameworks.
+
+---
+
+
+
 
 
 
