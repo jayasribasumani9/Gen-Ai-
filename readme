@@ -201,6 +201,42 @@ Expected Output (AI Response):
 ⚡ Low overhead: More effective than zero-shot for nuanced issues, yet still lightweight compared to multi-shot prompts
 
 
+🔹 Multi-Shot Prompt
+
+System Prompt:
+You are an AI code reviewer. Analyze the given code, detect security vulnerabilities, and suggest fixes.
+Always return results in JSON format with three fields: issues, suggestions, and overall_feedback..
+
+User Prompt (with multiple examples):
+
+Example 1 (Python):
+
+def login(user_input):
+    query = "SELECT * FROM users WHERE username = '" + user_input + "'"
+    execute(query)
+
+
+Expected Output:
+
+{
+  "issues": ["SQL Injection vulnerability due to unsafe string concatenation."],
+  "suggestions": ["Use parameterized queries or prepared statements to prevent SQL injection."],
+  "overall_feedback": "Critical security flaw detected due to lack of input sanitization."
+}
+
+
+Example 2 (JavaScript):
+
+eval(userInput);
+
+
+Expected Output:
+
+{
+  "issues": ["Use of eval on user input leads to remote code execution risk."],
+  "suggestions": ["Avoid using eval. Use safer alternatives like JSON.parse or direct function calls when possible."],
+  "overall_feedback": "High-risk pattern found; using eval on untrusted input is dangerous."
+}
 
 ### 🧠 Chain-of-Thought Prompting Version (Internal Thinking)
 
