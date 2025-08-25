@@ -324,7 +324,7 @@ def authenticate(user_input):
 Evaluation Dataset & Testing Framework (Python Only)
 📂 1. Evaluation Dataset
 
-This dataset includes 5 Python code snippets with known security flaws and expected outputs (summarized). These will be used to test the LLM's ability to reason and respond correctly via CoT prompting.
+This dataset includes 2 Python code snippets with known security flaws and expected outputs (summarized). These will be used to test the LLM's ability to reason and respond correctly via CoT prompting.
 
 evaluation_dataset = [
     {
@@ -342,30 +342,7 @@ evaluation_dataset = [
     exec(data)""",
         "expected_issue": "Use of exec() on user input allows arbitrary code execution."
     },
-    {
-        "id": 3,
-        "language": "Python",
-        "code": """import os
-os.system("rm -rf " + user_input)""",
-        "expected_issue": "Command injection via unsanitized user input in os.system."
-    },
-    {
-        "id": 4,
-        "language": "Python",
-        "code": """def is_even(n):
-    if n % 2 == 1:
-        return True
-    return False""",
-        "expected_issue": "Logic flaw: checks for odd numbers instead of even."
-    },
-    {
-        "id": 5,
-        "language": "Python",
-        "code": """password = input("Enter password: ")
-if password == "admin123":
-    print("Access granted")""",
-        "expected_issue": "Hardcoded password comparison is insecure."
-    }
+    
 ]
 
 ⚖️ 2. Judge Function
@@ -582,7 +559,7 @@ If run_model() correctly returns this for test 1:
 Then judge() will return:
 
 ✅ Pass – Correct issue identified
-
+x
 
 
 🎯 One-Shot Prompting System Prompt: You are a code security auditor. Analyze code snippets, detect security issues, and recommend fixes. Return JSON-formatted responses.
@@ -680,3 +657,105 @@ Objective and automated evaluation of security review accuracy.
 Clear metrics on detection and suggestion quality.
 
 Easily extendable with new vulnerability cases.
+
+
+✅ How to Log Token Usage in CodeGuard
+📌 What is a Token?
+
+A token is a basic unit of text that an AI model reads and writes. Tokens can be:
+
+Words (e.g., "hello")
+
+Word parts (e.g., "security" → "secur", "ity")
+
+Punctuation (e.g., "(", ")", ":")
+
+Quick rule of thumb:
+
+1 token ≈ 4 characters in English
+
+100 tokens ≈ 75 words
+
+LLM APIs (like OpenAI) charge per token and have token limits
+
+🛠️ Add Token Logging to CodeGuard’s Backend
+
+If you're using Python for CodeGuard (as listed in your tech stack), here's how to implement token tracking and logging using the openai and tiktoken libraries.
+
+🧱 1. Token Counting Utility
+import openai
+import tiktoken  # Install with `pip install tiktoken`
+
+def count_tokens(model, prompt, completion):
+    """Logs the number of tokens used in the prompt and completion."""
+    encoding = tiktoken.encoding_for_model(model)
+
+    input_tokens = len(encoding.encode(prompt))
+    output_tokens = len(encoding.encode(completion))
+    total = input_tokens + output_tokens
+
+    print("\n📦 Token Usage Summary:")
+    print(f"📝 Input Tokens: {input_tokens}")
+    print(f"📤 Output Tokens: {output_tokens}")
+    print(f"🔢 Total Tokens Used: {total}")
+    print("ℹ️ Note: 1 token ≈ 0.75 words. Used for billing and model limits.\n")
+
+    return total
+
+⚙️ 2. Integrate into CodeGuard LLM Call
+
+Assuming you're calling OpenAI like this:
+
+def analyze_security_code(language, code_snippet, model="gpt-4"):
+    system_prompt = (
+        "You are an AI Code Security Auditor. Analyze the given code snippet, "
+        "identify security vulnerabilities, recommend fixes, and provide an overall "
+        "security rating. Return results in JSON format containing:\n\n"
+        "issues: List of detected security flaws\n"
+        "suggestions: Recommended security improvements\n"
+        "overall_security_rating: A summary rating (e.g., 'High Risk', 'Medium Risk', 'Low Risk')"
+    )
+    
+    user_prompt = f"Review the following {language} code for security issues:\n\n{code_snippet}"
+    
+    messages = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": user_prompt}
+    ]
+
+    response = openai.ChatCompletion.create(
+        model=model,
+        messages=messages,
+        temperature=0.1,
+    )
+
+    output = response['choices'][0]['message']['content']
+    
+    # 🔍 Log token usage
+    count_tokens(model, user_prompt, output)
+    
+    return output
+
+🧪 Example Console Output After Each Call
+📦 Token Usage Summary:
+📝 Input Tokens: 83
+📤 Output Tokens: 127
+🔢 Total Tokens Used: 210
+ℹ️ Note: 1 token ≈ 0.75 words. Used for billing and model limits.
+
+📦 Benefits for CodeGuard
+
+Cost Awareness: Tracks per-audit token cost for billing
+
+Prompt Optimization: Adjust dynamic/multi-shot prompts if they consume too many tokens
+
+Debugging: Useful for tracing why a prompt might hit max token limits
+
+🔐 Optional: Log to File Instead of Console
+def log_tokens_to_file(file_path, model, prompt, completion):
+    total = count_tokens(model, prompt, completion)
+    with open(file_path, 'a') as f:
+        f.write(f"Model: {model}\n")
+        f.write(f"Input Tokens: {len(prompt)}\n")
+        f.write(f"Output Tokens: {len(completion)}\n")
+        f.write(f"Total Tokens Used: {total}\n\n")
