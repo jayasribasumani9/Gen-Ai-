@@ -237,7 +237,7 @@ Expected Output:
   "suggestions": ["Avoid using eval. Use safer alternatives like JSON.parse or direct function calls when possible."],
   "overall_feedback": "High-risk pattern found; using eval on untrusted input is dangerous."
 }
-------------------------------------------------------------------------------...........................................................
+------------------------------------------------------------------------------
 🔹 Dynamic Prompting
 
 🧠 What is Dynamic Prompting?
@@ -321,8 +321,129 @@ def authenticate(user_input):
   "overall_security_rating": "High Risk"
 }
 ```
+Evaluation Dataset & Testing Framework (Python Only)
+📂 1. Evaluation Dataset
 
----------
+This dataset includes 5 Python code snippets with known security flaws and expected outputs (summarized). These will be used to test the LLM's ability to reason and respond correctly via CoT prompting.
+
+evaluation_dataset = [
+    {
+        "id": 1,
+        "language": "Python",
+        "code": """def login(user_input):
+    query = "SELECT * FROM users WHERE username = '" + user_input + "'"
+    execute(query)""",
+        "expected_issue": "SQL Injection vulnerability due to unsafe string concatenation."
+    },
+    {
+        "id": 2,
+        "language": "Python",
+        "code": """def process(data):
+    exec(data)""",
+        "expected_issue": "Use of exec() on user input allows arbitrary code execution."
+    },
+    {
+        "id": 3,
+        "language": "Python",
+        "code": """import os
+os.system("rm -rf " + user_input)""",
+        "expected_issue": "Command injection via unsanitized user input in os.system."
+    },
+    {
+        "id": 4,
+        "language": "Python",
+        "code": """def is_even(n):
+    if n % 2 == 1:
+        return True
+    return False""",
+        "expected_issue": "Logic flaw: checks for odd numbers instead of even."
+    },
+    {
+        "id": 5,
+        "language": "Python",
+        "code": """password = input("Enter password: ")
+if password == "admin123":
+    print("Access granted")""",
+        "expected_issue": "Hardcoded password comparison is insecure."
+    }
+]
+
+⚖️ 2. Judge Function
+
+This function compares the AI's output with expected results based on:
+
+Correctness: Did it catch the core issue?
+
+Completeness: Did it suggest a meaningful fix?
+
+Format: Is the output valid JSON with all required fields?
+
+Clarity: Is the explanation clear?
+
+import json
+
+def judge(ai_output_str, expected_issue):
+    try:
+        output = json.loads(ai_output_str)
+        if not all(k in output for k in ["issues", "suggestions", "overall_feedback"]):
+            return "❌ Fail – Missing required fields"
+
+        issues = output["issues"]
+        suggestions = output["suggestions"]
+        feedback = output["overall_feedback"]
+
+        if not isinstance(issues, list) or not isinstance(suggestions, list):
+            return "❌ Fail – Issues and suggestions should be lists"
+
+        if any(expected_issue.lower() in issue.lower() for issue in issues):
+            return "✅ Pass – Correct issue identified"
+        elif expected_issue.lower() in feedback.lower():
+            return "✅ Pass – Issue mentioned in feedback"
+        else:
+            return "❌ Fail – Core issue not identified"
+
+    except json.JSONDecodeError:
+        return "❌ Fail – Output not valid JSON"
+
+🧪 3. Testing Framework
+
+Assumes run_model(prompt) is your function to get AI response (mocked here).
+
+def run_model(prompt):
+    """
+    Placeholder for model interaction.
+    Replace with actual OpenAI/HuggingFace API call or local inference.
+    """
+    # For testing, return dummy JSON output to trigger judge()
+    return json.dumps({
+        "issues": ["Dummy issue placeholder"],
+        "suggestions": ["Dummy suggestion"],
+        "overall_feedback": "Dummy feedback"
+    })
+
+def run_tests():
+    for test in evaluation_dataset:
+        prompt = f"Review the following {test['language']} code:\n\n{test['code']}"
+        ai_output = run_model(prompt)
+        verdict = judge(ai_output, test["expected_issue"])
+        print(f"Test {test['id']} — {verdict}")
+
+🧰 Output Example (Real Use)
+
+If run_model() correctly returns this for test 1:
+
+{
+  "issues": ["User input is directly concatenated into SQL, leading to injection vulnerability."],
+  "suggestions": ["Use parameterized queries or ORM to avoid SQL injection."],
+  "overall_feedback": "The code is highly vulnerable to SQL injection attacks."
+}
+
+
+Then judge() will return:
+
+✅ Pass – Correct issue identified
+
+---
 
 ### 🔄 Dynamic Prompting Template
 
@@ -340,62 +461,127 @@ Review this {{language}} code:
 
 ---
 
-### 📊 Testing Framework (Python Pseudo-code)
+Evaluation Dataset & Testing Framework (Python Only)
+📂 1. Evaluation Dataset
 
-```python
-for test in dataset:
-    ai_output = run_model(test["language"], test["code"])
-    verdict = judge(ai_output, test["expected"])
-    print(f"Test {test['id']}: {verdict}")
-```
+This dataset includes 5 Python code snippets with known security flaws and expected outputs (summarized). These will be used to test the LLM's ability to reason and respond correctly via CoT prompting.
 
-**Judge Criteria:**
-
-* ✅ **Correctness**: Was the main vulnerability correctly identified?
-* ✅ **Completeness**: Were actionable and comprehensive suggestions provided?
-* ✅ **Format**: Was the response in valid JSON?
-* ✅ **Clarity**: Was the output understandable and useful?
-
----
-
-### 🧠 Sample Evaluation Dataset (for Benchmarking)
-
-```json
-[
-  {
-    "id": 1,
-    "language": "Python",
-    "code": "def login(user_input): query = \"SELECT * FROM users WHERE username = '\" + user_input + \"'\"; execute(query)",
-    "expected": "SQL Injection vulnerability due to unsafe string concatenation."
-  },
-  {
-    "id": 2,
-    "language": "JavaScript",
-    "code": "eval(userInput);",
-    "expected": "Use of eval on user input leads to remote code execution risk."
-  },
-  {
-    "id": 3,
-    "language": "Java",
-    "code": "String password = \"12345\";",
-    "expected": "Hardcoded password detected."
-  },
-  {
-    "id": 4,
-    "language": "C++",
-    "code": "char buf[8]; strcpy(buf, input);",
-    "expected": "Buffer overflow risk with unsafe strcpy."
-  },
-  {
-    "id": 5,
-    "language": "Python",
-    "code": "os.system('rm -rf ' + user_input)",
-    "expected": "Command injection vulnerability due to unsafe shell command."
-  }
+evaluation_dataset = [
+    {
+        "id": 1,
+        "language": "Python",
+        "code": """def login(user_input):
+    query = "SELECT * FROM users WHERE username = '" + user_input + "'"
+    execute(query)""",
+        "expected_issue": "SQL Injection vulnerability due to unsafe string concatenation."
+    },
+    {
+        "id": 2,
+        "language": "Python",
+        "code": """def process(data):
+    exec(data)""",
+        "expected_issue": "Use of exec() on user input allows arbitrary code execution."
+    },
+    {
+        "id": 3,
+        "language": "Python",
+        "code": """import os
+os.system("rm -rf " + user_input)""",
+        "expected_issue": "Command injection via unsanitized user input in os.system."
+    },
+    {
+        "id": 4,
+        "language": "Python",
+        "code": """def is_even(n):
+    if n % 2 == 1:
+        return True
+    return False""",
+        "expected_issue": "Logic flaw: checks for odd numbers instead of even."
+    },
+    {
+        "id": 5,
+        "language": "Python",
+        "code": """password = input("Enter password: ")
+if password == "admin123":
+    print("Access granted")""",
+        "expected_issue": "Hardcoded password comparison is insecure."
+    }
 ]
-```
 
----
+⚖️ 2. Judge Function
+
+This function compares the AI's output with expected results based on:
+
+Correctness: Did it catch the core issue?
+
+Completeness: Did it suggest a meaningful fix?
+
+Format: Is the output valid JSON with all required fields?
+
+Clarity: Is the explanation clear?
+
+import json
+
+def judge(ai_output_str, expected_issue):
+    try:
+        output = json.loads(ai_output_str)
+        if not all(k in output for k in ["issues", "suggestions", "overall_feedback"]):
+            return "❌ Fail – Missing required fields"
+
+        issues = output["issues"]
+        suggestions = output["suggestions"]
+        feedback = output["overall_feedback"]
+
+        if not isinstance(issues, list) or not isinstance(suggestions, list):
+            return "❌ Fail – Issues and suggestions should be lists"
+
+        if any(expected_issue.lower() in issue.lower() for issue in issues):
+            return "✅ Pass – Correct issue identified"
+        elif expected_issue.lower() in feedback.lower():
+            return "✅ Pass – Issue mentioned in feedback"
+        else:
+            return "❌ Fail – Core issue not identified"
+
+    except json.JSONDecodeError:
+        return "❌ Fail – Output not valid JSON"
+
+🧪 3. Testing Framework
+
+Assumes run_model(prompt) is your function to get AI response (mocked here).
+
+def run_model(prompt):
+    """
+    Placeholder for model interaction.
+    Replace with actual OpenAI/HuggingFace API call or local inference.
+    """
+    # For testing, return dummy JSON output to trigger judge()
+    return json.dumps({
+        "issues": ["Dummy issue placeholder"],
+        "suggestions": ["Dummy suggestion"],
+        "overall_feedback": "Dummy feedback"
+    })
+
+def run_tests():
+    for test in evaluation_dataset:
+        prompt = f"Review the following {test['language']} code:\n\n{test['code']}"
+        ai_output = run_model(prompt)
+        verdict = judge(ai_output, test["expected_issue"])
+        print(f"Test {test['id']} — {verdict}")
+
+🧰 Output Example (Real Use)
+
+If run_model() correctly returns this for test 1:
+
+{
+  "issues": ["User input is directly concatenated into SQL, leading to injection vulnerability."],
+  "suggestions": ["Use parameterized queries or ORM to avoid SQL injection."],
+  "overall_feedback": "The code is highly vulnerable to SQL injection attacks."
+}
+
+
+Then judge() will return:
+
+✅ Pass – Correct issue identified
 
 
 
