@@ -1,4 +1,4 @@
-Project Title: CodeGuard – AI-Powered Code Security Auditor.
+Project Title: CodeGuard – AI-Powered Code Security Auditor..
 
 🚀 Project Overview CodeGuard is an AI assistant that reviews source code to detect security vulnerabilities, insecure coding practices, and potential exploits. Using Large Language Models (LLMs) with prompt engineering, it analyzes code snippets and returns structured feedback highlighting risks and suggesting secure fixes.
 
@@ -128,33 +128,6 @@ Review the following Python code and provide a structured security audit:
 
 ✅ Zero-Shot Prompting Examples (Python)
 🔎 Example 1
-def login(user_input):
-    query = "SELECT * FROM users WHERE username = '" + user_input + "'"
-    execute(query)
-
-
-AI Output:
-
-{
-  "issues": ["SQL Injection vulnerability due to unsafe string concatenation."],
-  "suggestions": ["Use parameterized queries or ORM methods to avoid SQL injection."],
-  "overall_security_rating": "High Risk"
-}
-
-🔎 Example 2
-import os
-os.system("rm -rf " + user_input)
-
-
-AI Output:
-
-{
-  "issues": ["Command injection vulnerability due to unvalidated shell input."],
-  "suggestions": ["Use the 'subprocess' module with argument lists instead of shell=True. Always sanitize input."],
-  "overall_security_rating": "High Risk"
-}
-
-🔎 Example 3
 def process(data):
     exec(data)
 
@@ -167,6 +140,67 @@ AI Output:
   "overall_security_rating": "High Risk"
 }
 ---
+
+🔐 One-Shot Prompting in CodeGuard (Python Only)
+
+In CodeGuard, we apply One-Shot Prompting, where the AI is provided with a single example to demonstrate the expected input-output behavior.
+This helps guide the model with a concrete example while keeping the prompt concise and flexible.
+It enhances the model's performance in detecting Python-specific security vulnerabilities.
+
+🔹 One-Shot Prompt Template (Python)
+
+System Prompt:
+You are an AI Code Security Auditor. Analyze Python code snippets, detect security vulnerabilities, and suggest secure coding practices.
+Return results in JSON format with the following fields:
+
+issues: List of detected security flaws
+
+suggestions: Recommended security improvements
+
+overall_security_rating: A summary rating (e.g., "High Risk", "Medium Risk", "Low Risk")
+
+User Prompt (with one example):
+
+🧪 Example Input (Python):
+
+password = input("Enter password: ")
+if password == "1234":
+    print("Access granted")
+
+
+Example Expected Output:
+
+{
+  "issues": ["Hardcoded password detected, which is insecure."],
+  "suggestions": ["Use secure password storage and verification methods like hashing with bcrypt."],
+  "overall_security_rating": "High Risk"
+}
+
+🔍 Now analyze this Python code:
+def process(data):
+    exec(data)
+
+
+Expected Output (AI Response):
+
+{
+  "issues": ["Use of 'exec' with untrusted input can lead to arbitrary code execution."],
+  "suggestions": ["Avoid using 'exec' on untrusted input. Refactor the code to use safer alternatives."],
+  "overall_security_rating": "High Risk"
+}
+
+
+📌 Why One-Shot Prompting (Python)?
+
+📘 Guidance with flexibility: One clear example helps the AI align with expected output format and tone
+
+🔐 Security-focused learning: The example demonstrates a common vulnerability, encouraging consistent detection
+
+🐍 Python-specific accuracy: Helps the model handle language nuances like exec, eval, and string injection
+
+⚡ Low overhead: More effective than zero-shot for nuanced issues, yet still lightweight compared to multi-shot prompts
+
+
 
 ### 🧠 Chain-of-Thought Prompting Version (Internal Thinking)
 
