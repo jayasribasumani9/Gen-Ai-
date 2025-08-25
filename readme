@@ -955,4 +955,120 @@ response = openai.ChatCompletion.create(
 ---
 
 
+### 🧠 What is **Top-k Sampling** in LLMs?
+
+**Top-k** sampling is a method used during **text generation** to limit the model's choices to the **k most probable next tokens**. It’s a form of **controlled randomness** that helps balance between creativity and coherence.
+
+---
+
+### 📊 How It Works:
+
+* The model assigns a probability to each possible next token.
+* Instead of considering *all* tokens, it **only samples from the top `k` most likely tokens**.
+* One of these `k` tokens is then chosen at random (weighted by their probabilities).
+
+---
+
+### 🔍 Example (Top-k = 5):
+
+If the model predicts the next token probabilities like this:
+
+| Token | Probability |
+| ----- | ----------- |
+| A     | 0.3         |
+| B     | 0.2         |
+| C     | 0.15        |
+| D     | 0.1         |
+| E     | 0.08        |
+| F     | 0.07        |
+| G     | 0.05        |
+
+With `top_k = 5`, the model will **truncate the list after the top 5 tokens** and **only choose from A–E**.
+
+---
+
+### 🔧 Why Use Top-k?
+
+* Controls the **diversity** and **coherence** of generated text.
+* Prevents the model from choosing very **unlikely or irrelevant tokens**.
+* High `k` → more diversity.
+  Low `k` → more deterministic and focused.
+
+---
+
+### 🔐 In CodeGuard (AI Code Security Auditor):
+
+Since you're building a **security analysis tool**, **accuracy and stability** are key.
+
+✅ **Recommended**: Use **low `top_k` (e.g., 20)** to ensure controlled token sampling and consistent vulnerability detection.
+
+---
+
+### 🛠️ Code Update: Add `top_k` Parameter
+
+Assuming you're using OpenAI’s API or similar (Python example):
+
+```python
+# Before
+response = openai.ChatCompletion.create(
+    model="gpt-4",
+    messages=prompt_messages,
+    temperature=0.2,
+    top_p=0.8
+)
+
+# After (with top_k added)
+response = openai.ChatCompletion.create(
+    model="gpt-4",
+    messages=prompt_messages,
+    temperature=0.2,
+    top_p=0.8,
+    top_k=20  # Limit sampling to top 20 tokens
+)
+```
+
+> 📝 **Note**: `top_k` is supported in some LLM APIs (like Hugging Face), but not in OpenAI's GPT models as of now. If you use Hugging Face models (e.g., CodeLlama, Falcon), `top_k` is applicable.
+
+---
+
+### 🔁 Git Workflow: Create a Pull Request
+
+1. **Create a new branch**
+
+   ```bash
+   git checkout -b feature/add-top-k
+   ```
+
+2. **Make the update in your backend LLM call** (see above).
+
+3. **Commit your changes**
+
+   ```bash
+   git add .
+   git commit -m "Add top_k=20 to LLM call for controlled sampling"
+   ```
+
+4. **Push your branch**
+
+   ```bash
+   git push origin feature/add-top-k
+   ```
+
+5. **Create a Pull Request**
+   Open a new PR from `feature/add-top-k` to `main` or `dev`.
+
+---
+
+### 📝 PR Description Example:
+
+> **Title:** Add `top_k=20` to LLM API Call
+>
+> **Description:**
+> This PR introduces `top_k=20` to the LLM configuration, restricting token sampling to the top 20 probable tokens. This helps maintain a balance between consistency and flexibility during code security analysis. It complements the existing `temperature=0.2` and `top_p=0.8` settings to improve reliability in audit results.
+
+---
+
+
+
+
 
