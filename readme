@@ -322,7 +322,7 @@ def authenticate(user_input):
 }
 ```
 
----
+---------
 
 ### 🔄 Dynamic Prompting Template
 
