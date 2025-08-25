@@ -237,7 +237,59 @@ Expected Output:
   "suggestions": ["Avoid using eval. Use safer alternatives like JSON.parse or direct function calls when possible."],
   "overall_feedback": "High-risk pattern found; using eval on untrusted input is dangerous."
 }
+------------------------------------------------------------------------------...........................................................
+🔹 Dynamic Prompting
 
+🧠 What is Dynamic Prompting?
+Dynamic prompting adjusts the prompt in real time using placeholders that are filled with user-specific or runtime data—like the programming language and code snippet. This allows the LLM to better understand the context and produce more relevant, high-quality results.
+
+✅ Dynamic Prompt Template
+
+🔹 System Prompt Template:
+
+You are a code security auditor. Analyze the following {{language}} code snippet, detect security vulnerabilities, and suggest fixes. 
+Return the output as a JSON object with the following structure:
+
+{
+  "issues": [List of security issues found],
+  "suggestions": [Recommended secure coding practices or fixes],
+  "overall_security_rating": "High Risk | Medium Risk | Low Risk"
+}
+
+🔸 Example Invocation with Filled Template
+
+User Prompt:
+
+Review this JavaScript code:
+
+document.write(userInput);
+
+
+Final Prompt Sent to Model:
+
+You are a code security auditor. Analyze the following JavaScript code snippet, detect security vulnerabilities, and suggest fixes. 
+Return the output as a JSON object with the following structure:
+
+{
+  "issues": [List of security issues found],
+  "suggestions": [Recommended secure coding practices or fixes],
+  "overall_security_rating": "High Risk | Medium Risk | Low Risk"
+}
+
+Review this JavaScript code:
+
+document.write(userInput);
+
+
+Expected Output:
+
+{
+  "issues": ["Potential Cross-Site Scripting (XSS) vulnerability."],
+  "suggestions": ["Use proper input sanitization or DOMPurify to sanitize input before inserting into the DOM."],
+  "overall_security_rating": "Medium Risk"
+}
+
+.............
 ### 🧠 Chain-of-Thought Prompting Version (Internal Thinking)
 
 **System Prompt:**
