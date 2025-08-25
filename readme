@@ -38,7 +38,7 @@ Continuous learning from new vulnerability databases and advisories
 
 Thanks for the detailed project outline. You're building **CodeGuard**, an AI-powered code security auditor that applies advanced prompting strategies (Zero/One/Multi-shot, Dynamic, Chain-of-Thought), LLMs, and vector search for vulnerability detection.
 
-To help you **mirror the structure** you've described for **AlgoSage** but tailored for **CodeGuard**, here’s a refined and **RTFC-aligned prompt schema** for your system:
+To help you **mirror the structure** you've described for *** but tailored for **CodeGuard**, here’s a refined and **RTFC-aligned prompt schema** for your system:
 
 ---
 
@@ -842,5 +842,117 @@ You would:
 * **Temperature** controls output **creativity vs. reliability**.
 * **Low temperature (\~0.2)** is ideal for **security auditing** tasks like in CodeGuard.
 * Update your LLM API calls to include `temperature=0.2` for **consistent and reliable analysis**.
+
+
+
+### 🧠 What is **Top-p (Nucleus Sampling)** in LLMs?
+
+**Top-p**, also known as **nucleus sampling**, is a decoding parameter that controls **how many possible next tokens the model considers** when generating text. It is an **alternative to top-k sampling**, but based on **probability mass** rather than a fixed number of tokens.
+
+---
+
+### 📊 Concept Breakdown:
+
+* The model ranks all possible next tokens by their probability.
+* It then **selects the smallest set of tokens** whose **cumulative probability ≥ p**.
+* From this subset, it samples the next token **randomly**.
+
+---
+
+### 🔍 Example (Top-p = 0.9):
+
+Suppose the model has these token probabilities:
+
+| Token | Probability |
+| ----- | ----------- |
+| A     | 0.5         |
+| B     | 0.2         |
+| C     | 0.1         |
+| D     | 0.05        |
+| E     | 0.05        |
+| ...   | ...         |
+
+With **top-p = 0.9**, the model selects tokens A, B, and C (0.5 + 0.2 + 0.1 = 0.8), then adds token D (0.05) to reach 0.85, and finally E (0.05) to reach 0.9. It will then **sample randomly from \[A, B, C, D, E]**.
+
+---
+
+### 🔧 Why Use Top-p?
+
+* **Controls diversity** of generated text.
+* Unlike top-k, it **adapts to the distribution**—choosing more or fewer tokens depending on how confident the model is.
+* Works well for **creative tasks**, but can introduce **unwanted randomness** in structured domains (like code security).
+
+---
+
+### 🔐 In CodeGuard (AI Code Security Auditor):
+
+For **code auditing**, you want **precise and stable results**.
+
+✅ Recommended:
+
+* Use a **low top-p**, e.g., **`top_p = 0.8`**, to limit token randomness and ensure consistent outputs.
+
+---
+
+### 🛠️ Code Update: Top-p Parameter in LLM Call
+
+Assuming you’re using OpenAI’s Python API:
+
+```python
+# Before
+response = openai.ChatCompletion.create(
+    model="gpt-4",
+    messages=prompt_messages,
+    temperature=0.2
+)
+
+# After (with top_p added)
+response = openai.ChatCompletion.create(
+    model="gpt-4",
+    messages=prompt_messages,
+    temperature=0.2,
+    top_p=0.8  # Updated top_p for controlled token sampling
+)
+```
+
+---
+
+### 🔁 Git Workflow: Create a Pull Request
+
+1. **Create a new branch**
+
+   ```bash
+   git checkout -b feature/set-top-p
+   ```
+
+2. **Make code changes** (as shown above).
+
+3. **Commit your changes**
+
+   ```bash
+   git add .
+   git commit -m "Add top_p=0.8 to LLM call for controlled token sampling"
+   ```
+
+4. **Push your branch**
+
+   ```bash
+   git push origin feature/set-top-p
+   ```
+
+5. **Open a pull request**
+   On GitHub/GitLab, compare `feature/set-top-p` with `main` or `dev` and open a new PR.
+
+---
+
+### 📝 PR Description Example:
+
+> **Title:** Add `top_p=0.8` to LLM API Call
+>
+> **Description:**
+> This PR updates the OpenAI ChatCompletion call by adding `top_p=0.8` to control the diversity of token sampling during AI-driven code security audits. Combined with `temperature=0.2`, this ensures degi git terministic, consistent, and high-quality results for vulnerability detection and suggestions.
+
+---
+
 
 
